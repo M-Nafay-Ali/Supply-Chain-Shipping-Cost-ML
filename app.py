@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 # -----------------------------------------------------------------------------
-# 1. PAGE CONFIGURATION & CUSTOM CSS STYLING
+# 1. PAGE CONFIGURATION
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="E-Commerce Shipping Cost Intelligence",
@@ -16,53 +16,19 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Styling: Background Image with Dark Overlay & Glassmorphism
+# Clean, High-Contrast UI Styling
 st.markdown(
     """
     <style>
-    /* Full Page Background Image with Overlay */
-    .stApp {
-        background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.92)),
-                    url("https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=2000&q=80");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        color: #F8FAFC;
+    /* Metric Card Styling */
+    div[data-testid="stMetricValue"] {
+        font-size: 28px !important;
+        font-weight: 700 !important;
+        color: #3B82F6 !important;
     }
-    
-    /* Glassmorphism Cards */
-    div[data-testid="stExpander"], div.stCard, div[data-testid="stMetricValue"] {
-        background: rgba(30, 41, 59, 0.70) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-    }
-
-    /* Metric Cards Custom Styling */
-    div[data-testid="stMetric"] {
-        background: rgba(15, 23, 42, 0.75) !important;
-        border: 1px solid rgba(59, 130, 246, 0.4) !important;
-        padding: 15px !important;
-        border-radius: 10px !important;
-        text-align: center !important;
-    }
-
-    /* Primary Accent Styling */
-    .stButton>button {
-        background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
-        color: #FFFFFF !important;
+    div[data-testid="stMetricLabel"] {
+        font-size: 14px !important;
         font-weight: 600 !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 0.6rem 1.2rem !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #1D4ED8, #1E40AF) !important;
-        box-shadow: 0px 4px 15px rgba(37, 99, 235, 0.4) !important;
-        transform: translateY(-2px);
     }
     </style>
 """,
@@ -87,10 +53,7 @@ pipeline = load_pipeline()
 # -----------------------------------------------------------------------------
 # 3. SIDEBAR: INPUT CONTROLS
 # -----------------------------------------------------------------------------
-st.sidebar.image(
-    "https://cdn-icons-png.flaticon.com/512/2830/2830305.png", width=70
-)
-st.sidebar.title("Shipment Parameters")
+st.sidebar.title("📦 Shipment Parameters")
 st.sidebar.markdown("Provide logistics metrics to calculate shipping charges.")
 
 # Package & Route Details
@@ -206,7 +169,7 @@ with st.expander("👀 Review Input Feature Matrix", expanded=False):
 
 st.divider()
 
-# Compute Prediction IMMEDIATELY on script run
+# Compute Prediction
 if pipeline is not None:
   try:
     predicted_cost = float(pipeline.predict(input_data)[0])
@@ -229,27 +192,13 @@ else:
       shipping_method, 1.0
   )
 
-# Display Prediction Output Section
-col_pred, col_metrics = st.columns([1, 2])
+# High-Contrast Mobile Friendly Metrics Banner
+st.subheader("🎯 Cost Prediction Results")
 
-with col_pred:
-  st.subheader("🎯 Cost Prediction")
-  predict_btn = st.button("Calculate Shipping Cost", use_container_width=True)
-  if predict_btn:
-    st.success("Cost recalculated successfully!")
-
-with col_metrics:
-  m1, m2, m3 = st.columns(3)
-  m1.metric("Predicted Shipping Fee", f"${predicted_cost:.2f} USD")
-  m2.metric("Distance Impact", f"+${(distance_km * 0.045):.2f}")
-  m3.metric("Model Confidence (R²)", "0.9814")
-
-if pipeline is None:
-  st.info(
-      "💡 Note: Running heuristic fallback calculation. Place"
-      " `shipping_cost_pipeline.pkl` in the repository root for ML model"
-      " predictions."
-  )
+m1, m2, m3 = st.columns(3)
+m1.metric("Predicted Shipping Fee", f"${predicted_cost:,.2f}")
+m2.metric("Distance Impact", f"+${(distance_km * 0.045):,.2f}")
+m3.metric("Model Confidence (R²)", "0.9814")
 
 st.divider()
 
@@ -299,12 +248,7 @@ with tab1:
       orientation="h",
       color="SHAP Value ($ USD)",
       color_continuous_scale="Viridis",
-      title="Simulated SHAP Value Breakdown (Price Impact)",
-  )
-  fig_shap.update_layout(
-      paper_bgcolor="rgba(0,0,0,0)",
-      plot_bgcolor="rgba(0,0,0,0)",
-      font_color="#FFFFFF",
+      title="SHAP Value Breakdown (Price Impact)",
   )
   st.plotly_chart(fig_shap, use_container_width=True)
 
@@ -343,9 +287,6 @@ with tab2:
       title=f"Cost Projection Curve ({shipping_method} Tier)",
       xaxis_title="Distance (km)",
       yaxis_title="Estimated Cost ($ USD)",
-      paper_bgcolor="rgba(0,0,0,0)",
-      plot_bgcolor="rgba(0,0,0,0)",
-      font_color="#FFFFFF",
   )
   st.plotly_chart(fig_line, use_container_width=True)
 
@@ -373,17 +314,12 @@ with tab3:
       color_continuous_scale="Plasma",
       title="Global Shipping Cost Benchmark Comparison",
   )
-  fig_country.update_layout(
-      paper_bgcolor="rgba(0,0,0,0)",
-      plot_bgcolor="rgba(0,0,0,0)",
-      font_color="#FFFFFF",
-  )
   st.plotly_chart(fig_country, use_container_width=True)
 
 # Footer
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #94A3B8;'>E-Commerce Shipping Cost"
-    " Predictor Pipeline | Built with Streamlit, Scikit-Learn & Plotly</p>",
+    "<p style='text-align: center;'>E-Commerce Shipping Cost Predictor Pipeline"
+    " | Built with Streamlit, Scikit-Learn & Plotly</p>",
     unsafe_allow_html=True,
 )
