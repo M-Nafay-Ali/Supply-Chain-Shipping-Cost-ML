@@ -22,7 +22,7 @@ st.markdown(
     <style>
     /* Full Page Background Image with Overlay */
     .stApp {
-        background: linear-gradient(rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.90)),
+        background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.92)),
                     url("https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=2000&q=80");
         background-size: cover;
         background-position: center;
@@ -41,11 +41,11 @@ st.markdown(
 
     /* Metric Cards Custom Styling */
     div[data-testid="stMetric"] {
-        background: rgba(15, 23, 42, 0.65);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(59, 130, 246, 0.4) !important;
+        padding: 15px !important;
+        border-radius: 10px !important;
+        text-align: center !important;
     }
 
     /* Primary Accent Styling */
@@ -155,10 +155,8 @@ weather_condition = st.sidebar.selectbox(
     "Weather Condition", ["Clear", "Rainy", "Stormy", "Foggy", "Snowy"]
 )
 
-# Order Date Picker (Generates year, month, day, day_of_week, and is_weekend automatically)
-order_date = st.sidebar.date_input(
-    "Order Date", pd.to_datetime("today")
-)
+# Order Date Picker
+order_date = st.sidebar.date_input("Order Date", pd.to_datetime("today"))
 
 
 # -----------------------------------------------------------------------------
@@ -208,14 +206,7 @@ with st.expander("👀 Review Input Feature Matrix", expanded=False):
 
 st.divider()
 
-# Prediction Action
-col_pred, col_metrics = st.columns([1, 2])
-
-with col_pred:
-  st.subheader("🎯 Cost Prediction")
-  predict_btn = st.button("Calculate Shipping Cost", use_container_width=True)
-
-# Calculate Prediction
+# Compute Prediction IMMEDIATELY on script run
 if pipeline is not None:
   try:
     predicted_cost = float(pipeline.predict(input_data)[0])
@@ -237,6 +228,15 @@ else:
   predicted_cost = (base_cost + dist_cost + weight_cost) * method_mult.get(
       shipping_method, 1.0
   )
+
+# Display Prediction Output Section
+col_pred, col_metrics = st.columns([1, 2])
+
+with col_pred:
+  st.subheader("🎯 Cost Prediction")
+  predict_btn = st.button("Calculate Shipping Cost", use_container_width=True)
+  if predict_btn:
+    st.success("Cost recalculated successfully!")
 
 with col_metrics:
   m1, m2, m3 = st.columns(3)
