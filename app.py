@@ -154,22 +154,15 @@ warehouse_processing_hours = st.sidebar.slider(
 weather_condition = st.sidebar.selectbox(
     "Weather Condition", ["Clear", "Rainy", "Stormy", "Foggy", "Snowy"]
 )
-day_of_week = st.sidebar.selectbox(
-    "Day of Week",
-    [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-    ],
+
+# Order Date Picker (Generates year, month, day, day_of_week, and is_weekend automatically)
+order_date = st.sidebar.date_input(
+    "Order Date", pd.to_datetime("today")
 )
 
 
 # -----------------------------------------------------------------------------
-# 4. MAIN INTERFACE
+# 4. MAIN INTERFACE & FEATURE ENGINEERING
 # -----------------------------------------------------------------------------
 st.title("📦 E-Commerce Shipping Cost Intelligence")
 st.markdown(
@@ -177,7 +170,18 @@ st.markdown(
     " SHAP explainability."
 )
 
-# Construct Input DataFrame with EXACT match to training feature_cols order
+# Extract Date Features
+selected_date = pd.to_datetime(order_date)
+day = selected_date.day
+month = selected_date.month
+year = selected_date.year
+day_of_week = selected_date.day_name()
+is_weekend = 1 if selected_date.dayofweek in [5, 6] else 0
+
+# Engineer Processing Ratio
+processing_ratio = warehouse_processing_hours / (distance_km + 1e-5)
+
+# Construct Input DataFrame containing ALL required features
 input_data = pd.DataFrame({
     "product_weight_kg": [product_weight_kg],
     "order_value_usd": [order_value_usd],
@@ -191,6 +195,11 @@ input_data = pd.DataFrame({
     "weather_condition": [weather_condition],
     "day_of_week": [day_of_week],
     "package_size": [package_size],
+    "day": [day],
+    "month": [month],
+    "year": [year],
+    "is_weekend": [is_weekend],
+    "processing_ratio": [processing_ratio],
 })
 
 # Display Inputs Preview in Expander
